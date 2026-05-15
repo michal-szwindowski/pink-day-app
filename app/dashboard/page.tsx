@@ -46,7 +46,7 @@ function getRoleLabel(role: ProfileRole) {
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { profile, supabase } = useAppContext()
+  const { profile, refreshProfile, supabase } = useAppContext()
   const { showToast } = useToast()
   const [allowedUsers, setAllowedUsers] = useState<Awaited<ReturnType<typeof fetchAllowedUsers>>>(
     [],
@@ -57,12 +57,15 @@ export default function DashboardPage() {
   const [userToDelete, setUserToDelete] = useState<
     Awaited<ReturnType<typeof fetchAllowedUsers>>[number] | null
   >(null)
+  const [userToToggle, setUserToToggle] = useState<
+    Awaited<ReturnType<typeof fetchAllowedUsers>>[number] | null
+  >(null)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isPending, startTransition] = useTransition()
 
-  useBodyScrollLock(Boolean(userToDelete) || isUserModalOpen)
+  useBodyScrollLock(Boolean(userToDelete) || Boolean(userToToggle) || isUserModalOpen)
 
   const loadData = useEffectEvent(async (showLoader = false) => {
     if (showLoader) {
@@ -194,46 +197,7 @@ export default function DashboardPage() {
 
                 <Button
                   disabled={isPending || wouldRemoveLastOwner || adminCannotChangeOwner}
-                  onClick={() => {
-                    startTransition(async () => {
-                      try {
-                        setError(null)
-                        setMessage(null)
-
-                        const response = await supabase
-                          .from('allowed_users')
-                          .update({ active: !allowedUser.active })
-                          .eq('id', allowedUser.id)
-
-                        if (response.error) {
-                          throw response.error
-                        }
-
-                        const profileResponse = await supabase
-                          .from('profiles')
-                          .update({ active: !allowedUser.active })
-                          .eq('email', allowedUser.email)
-
-                        if (profileResponse.error) {
-                          throw profileResponse.error
-                        }
-
-                        const nextMessage = allowedUser.active
-                          ? 'Dostęp został wyłączony.'
-                          : 'Dostęp został ponownie włączony.'
-                        setMessage(nextMessage)
-                        showToast(nextMessage, 'success')
-                        await loadData(false)
-                      } catch (caughtError) {
-                        const nextError = getErrorMessage(
-                          caughtError,
-                          'Nie udało się zmienić dostępu.',
-                        )
-                        setError(nextError)
-                        showToast(nextError, 'error')
-                      }
-                    })
-                  }}
+                  onClick={() => setUserToToggle(allowedUser)}
                   variant="ghost"
                 >
                   {allowedUser.active ? 'Wyłącz' : 'Włącz'}
@@ -433,6 +397,12 @@ export default function DashboardPage() {
 
                       setMessage('Dostęp został usunięty.')
                       showToast('Dostęp został usunięty.', 'success')
+
+                      if (selectedUser.email === profile?.email) {
+                        await refreshProfile()
+                        return
+                      }
+
                       await loadData(false)
                     } catch (caughtError) {
                       const nextError = getErrorMessage(
@@ -451,6 +421,84 @@ export default function DashboardPage() {
               <Button
                 disabled={isPending}
                 onClick={() => setUserToDelete(null)}
+                variant="secondary"
+              >
+                Anuluj
+              </Button>
+            </div>
+          </Card>
+        </ModalOverlay>
+      ) : null}
+
+      {userToToggle ? (
+        <ModalOverlay>
+          <Card className="w-full max-w-md space-y-4">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#c65b84]">
+                Potwierdzenie
+              </p>
+              <h2 className="text-xl font-black text-[#422c36]">
+                {userToToggle.active ? 'Wyłączyć dostęp?' : 'Włączyć dostęp?'}
+              </h2>
+              <p className="text-sm leading-6 text-[#7f6870]">
+                {userToToggle.active && userToToggle.email === profile?.email
+                  ? 'Wyłączasz własny dostęp. Po potwierdzeniu od razu wrócisz do ekranu logowania i nie wejdziesz do aplikacji, dopóki ktoś z uprawnieniami nie przywróci Ci dostępu.'
+                  : userToToggle.active
+                    ? 'Ta osoba straci dostęp do aplikacji, dopóki ponownie go nie włączysz.'
+                    : 'Ta osoba znów będzie mogła korzystać z aplikacji po zalogowaniu.'}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                disabled={isPending}
+                onClick={() => {
+                  const selectedUser = userToToggle
+
+                  startTransition(async () => {
+                    try {
+                      setError(null)
+                      setMessage(null)
+                      setUserToToggle(null)
+
+                      const nextActive = !selectedUser.active
+                      const response = await supabase
+                        .from('allowed_users')
+                        .update({ active: nextActive })
+                        .eq('id', selectedUser.id)
+
+                      if (response.error) {
+                        throw response.error
+                      }
+
+                      const nextMessage = selectedUser.active
+                        ? 'Dostęp został wyłączony.'
+                        : 'Dostęp został ponownie włączony.'
+                      setMessage(nextMessage)
+                      showToast(nextMessage, 'success')
+
+                      if (!nextActive && selectedUser.email === profile?.email) {
+                        await refreshProfile()
+                        return
+                      }
+
+                      await loadData(false)
+                    } catch (caughtError) {
+                      const nextError = getErrorMessage(
+                        caughtError,
+                        'Nie udało się zmienić dostępu.',
+                      )
+                      setError(nextError)
+                      showToast(nextError, 'error')
+                    }
+                  })
+                }}
+                variant={userToToggle.active ? 'danger' : 'primary'}
+              >
+                {userToToggle.active ? 'Tak, wyłącz' : 'Tak, włącz'}
+              </Button>
+              <Button
+                disabled={isPending}
+                onClick={() => setUserToToggle(null)}
                 variant="secondary"
               >
                 Anuluj

@@ -51,6 +51,7 @@ export async function resolveProfileForSession(supabase: AppSupabaseClient, auth
     .from('profiles')
     .select('*')
     .eq('auth_user_id', authUserId)
+    .eq('active', true)
     .maybeSingle()
 
   if (profileResponse.error) {
