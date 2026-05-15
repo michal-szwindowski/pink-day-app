@@ -7,6 +7,7 @@ import { useEffect, useEffectEvent, useState, useTransition } from 'react'
 import { BalanceCard } from '@/components/balance-card'
 import { BottomNav } from '@/components/bottom-nav'
 import { LoadingScreen } from '@/components/loading-screen'
+import { MemberLoadingScreen } from '@/components/member-loading-screen'
 import { PhotoUploader } from '@/components/photo-uploader'
 import { useAppContext } from '@/components/providers/app-provider'
 import { useToast } from '@/components/providers/toast-provider'
@@ -170,12 +171,16 @@ export default function HomePage() {
     })
   }
 
-  if (status === 'loading' || isLoading) {
+  if (status === 'loading') {
     return <LoadingScreen label="Ładowanie aplikacji..." />
   }
 
   if (!profile) {
     return <LoadingScreen label="Przekierowanie..." />
+  }
+
+  if (isLoading) {
+    return <MemberLoadingScreen label="Ładowanie aplikacji..." />
   }
 
   if (!activePair) {

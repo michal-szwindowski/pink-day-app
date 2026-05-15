@@ -6,6 +6,7 @@ import { useEffect, useEffectEvent, useState, useTransition } from 'react'
 import { BalanceCard } from '@/components/balance-card'
 import { BottomNav } from '@/components/bottom-nav'
 import { LoadingScreen } from '@/components/loading-screen'
+import { MemberLoadingScreen } from '@/components/member-loading-screen'
 import { useAppContext } from '@/components/providers/app-provider'
 import { useToast } from '@/components/providers/toast-provider'
 import { RewardCard } from '@/components/reward-card'
@@ -81,7 +82,11 @@ export default function MemberRewardsPage() {
   })
 
   if (isLoading) {
-    return <LoadingScreen label="Ładowanie nagród..." />
+    return status === 'ready' ? (
+      <MemberLoadingScreen label="Ładowanie nagród..." />
+    ) : (
+      <LoadingScreen label="Ładowanie nagród..." />
+    )
   }
 
   return (

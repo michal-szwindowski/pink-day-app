@@ -6,6 +6,7 @@ import { useEffect, useEffectEvent, useState, useTransition } from 'react'
 
 import { BottomNav } from '@/components/bottom-nav'
 import { LoadingScreen } from '@/components/loading-screen'
+import { MemberLoadingScreen } from '@/components/member-loading-screen'
 import { useAppContext } from '@/components/providers/app-provider'
 import { useToast } from '@/components/providers/toast-provider'
 import { StatusBadge } from '@/components/status-badge'
@@ -347,7 +348,11 @@ export default function PairPage() {
   }
 
   if (isLoading) {
-    return <LoadingScreen label="Ładowanie pary..." />
+    return status === 'ready' ? (
+      <MemberLoadingScreen label="Ładowanie pary..." />
+    ) : (
+      <LoadingScreen label="Ładowanie pary..." />
+    )
   }
 
   return (

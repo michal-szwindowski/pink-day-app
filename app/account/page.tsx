@@ -6,9 +6,11 @@ import { useEffect, useEffectEvent, useState, useTransition } from 'react'
 
 import { BottomNav } from '@/components/bottom-nav'
 import { LoadingScreen } from '@/components/loading-screen'
+import { MemberLoadingScreen } from '@/components/member-loading-screen'
 import { useAppContext } from '@/components/providers/app-provider'
 import { useToast } from '@/components/providers/toast-provider'
 import { PushSettings } from '@/components/push-settings'
+import { PwaInstallHelp } from '@/components/pwa-install-help'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ModalOverlay } from '@/components/ui/modal'
@@ -178,7 +180,11 @@ export default function AccountPage() {
   }
 
   if (isLoading) {
-    return <LoadingScreen label="Ładowanie konta..." />
+    return status === 'ready' ? (
+      <MemberLoadingScreen label="Ładowanie konta..." />
+    ) : (
+      <LoadingScreen label="Ładowanie konta..." />
+    )
   }
 
   return (
@@ -195,6 +201,7 @@ export default function AccountPage() {
         {message ? <Card className="bg-[#eefaf3] text-sm text-[#2f7753]">{message}</Card> : null}
         {error ? <Card className="bg-[#fff1f4] text-sm text-[#a2435f]">{error}</Card> : null}
 
+        <PwaInstallHelp />
         <PushSettings />
 
         <Card className="space-y-4">

@@ -5,6 +5,7 @@ import { useEffect, useEffectEvent, useState } from 'react'
 
 import { BottomNav } from '@/components/bottom-nav'
 import { LoadingScreen } from '@/components/loading-screen'
+import { MemberLoadingScreen } from '@/components/member-loading-screen'
 import { useAppContext } from '@/components/providers/app-provider'
 import { StatusBadge } from '@/components/status-badge'
 import { Card } from '@/components/ui/card'
@@ -223,7 +224,11 @@ export default function MemberHistoryPage() {
   })
 
   if (isLoading) {
-    return <LoadingScreen label="Ładowanie historii..." />
+    return status === 'ready' ? (
+      <MemberLoadingScreen label="Ładowanie historii..." />
+    ) : (
+      <LoadingScreen label="Ładowanie historii..." />
+    )
   }
 
   const stats = buildStats(pair, pairStats, profile?.id ?? null)
