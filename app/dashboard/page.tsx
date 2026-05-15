@@ -162,7 +162,7 @@ export default function DashboardPage() {
         </div>
       </Card>
 
-      <section className="section-stack">
+      <section className="section-stack lg:grid lg:grid-cols-2 lg:items-start">
         {allowedUsers.map((allowedUser) => {
           const wouldRemoveLastOwner =
             allowedUser.active && allowedUser.role === 'owner' && ownerCount(allowedUsers) <= 1

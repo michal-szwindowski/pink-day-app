@@ -4,9 +4,9 @@ import { Check, Gift, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useEffectEvent, useState, useTransition } from 'react'
 
-import { BottomNav } from '@/components/bottom-nav'
 import { LoadingScreen } from '@/components/loading-screen'
 import { MemberLoadingScreen } from '@/components/member-loading-screen'
+import { MemberShell } from '@/components/member-shell'
 import { useAppContext } from '@/components/providers/app-provider'
 import { useToast } from '@/components/providers/toast-provider'
 import { StatusBadge } from '@/components/status-badge'
@@ -356,7 +356,7 @@ export default function PairPage() {
   }
 
   return (
-    <div className="app-shell px-4 pb-32 pt-5">
+    <MemberShell>
       <main className="section-stack">
         <section className="space-y-2 px-1">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">Para</p>
@@ -377,325 +377,332 @@ export default function PairPage() {
           </Card>
         ) : (
           <>
-            <Card className="space-y-3">
-              <div>
-                <h2 className="text-lg font-bold text-[#422c36]">Pseudonim połówki</h2>
-                <p className="text-sm leading-6 text-[#7f6870]">
-                  To jest tylko Twoja nazwa dla tej osoby. Jej własna nazwa profilu zostaje bez
-                  zmian.
-                </p>
-              </div>
-              <label>
-                <span className="field-label">Jak chcesz ją/go widzieć?</span>
-                <input
-                  onChange={(event) => setPartnerNickname(event.target.value)}
-                  placeholder={partnerName ?? 'np. Misiak'}
-                  value={partnerNickname}
-                />
-              </label>
-              <Button
-                disabled={isPending}
-                fullWidth
-                onClick={savePartnerNickname}
-                variant="secondary"
-              >
-                Zapisz pseudonim
-              </Button>
-            </Card>
-
-            <Card className="space-y-4">
-              <h2 className="text-lg font-bold text-[#422c36]">
-                {partnerName ? `Zgłoszenia od ${partnerName}` : 'Zgłoszenia partnera'}
-              </h2>
-              {submissions.length ? (
-                submissions.map((submission) => (
-                  <div className="space-y-3 rounded-3xl bg-[#fff8fb] p-4" key={submission.id}>
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-bold text-[#422c36]">
-                          {submission.tasks?.title ?? 'Zadanie'}
-                        </p>
-                        <p className="text-sm text-[#7f6870]">
-                          {formatDateKey(submission.submission_date)} ·{' '}
-                          {submission.member_profile?.display_name ??
-                            submission.member_profile?.email ??
-                            'Użytkownik'}
-                        </p>
-                      </div>
-                      <StatusBadge status={submission.status} />
-                    </div>
-
-                    {submission.submission_photos?.length ? (
-                      <div className="grid grid-cols-3 gap-2">
-                        {submission.submission_photos.map((photo) =>
-                          photoUrls[photo.storage_path] ? (
-                            /* biome-ignore lint/performance/noImgElement: signed Supabase URLs are shown directly for private task proofs. */
-                            <img
-                              alt="Zdjęcie zgłoszenia"
-                              className="aspect-square w-full rounded-2xl object-cover"
-                              key={photo.id}
-                              src={photoUrls[photo.storage_path]}
-                            />
-                          ) : null,
-                        )}
-                      </div>
-                    ) : null}
-
-                    {submission.rejection_reason ? (
-                      <p className="text-sm text-[#a2435f]">{submission.rejection_reason}</p>
-                    ) : null}
-
-                    {submission.status === 'pending' ? (
-                      <div className="space-y-2">
-                        <input
-                          onChange={(event) =>
-                            setRejectionReasons((current) => ({
-                              ...current,
-                              [submission.id]: event.target.value,
-                            }))
-                          }
-                          placeholder="Powód odrzucenia, jeśli odrzucasz"
-                          value={rejectionReasons[submission.id] ?? ''}
-                        />
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button
-                            disabled={isPending}
-                            onClick={() => setSubmissionToApprove(submission.id)}
-                          >
-                            <Check className="mr-2" size={16} />
-                            Akceptuj
-                          </Button>
-                          <Button
-                            disabled={isPending}
-                            onClick={() => reviewSubmission(submission.id, 'reject')}
-                            variant="danger"
-                          >
-                            <X className="mr-2" size={16} />
-                            Odrzuć
-                          </Button>
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-[#7f6870]">
-                  {partnerName
-                    ? `${partnerName} nie ma jeszcze zgłoszeń do sprawdzenia.`
-                    : 'Nie ma jeszcze zgłoszeń partnera do sprawdzenia.'}
-                </p>
-              )}
-            </Card>
-
-            <Card className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-bold text-[#422c36]">
-                    {partnerName ? `Zadania dla ${partnerName}` : 'Zadania dla partnera'}
-                  </h2>
-                  <p className="text-sm text-[#7f6870]">
-                    To są zadania, które ustawiasz drugiej osobie.
-                  </p>
-                </div>
-                <Button disabled={isPending} onClick={openCreateTaskModal}>
-                  <Plus className="mr-2" size={16} />
-                  Dodaj
-                </Button>
-              </div>
-
-              <div className="space-y-2">
-                {tasks.length ? (
-                  tasks.map((task) => (
-                    <div className="space-y-3 rounded-3xl bg-[#fff8fb] p-4" key={task.id}>
+            <div className="section-stack lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)] lg:items-start">
+              <Card className="space-y-4">
+                <h2 className="text-lg font-bold text-[#422c36]">
+                  {partnerName ? `Zgłoszenia od ${partnerName}` : 'Zgłoszenia partnera'}
+                </h2>
+                {submissions.length ? (
+                  submissions.map((submission) => (
+                    <div className="space-y-3 rounded-3xl bg-[#fff8fb] p-4" key={submission.id}>
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="font-semibold text-[#422c36]">{task.title}</p>
+                          <p className="font-bold text-[#422c36]">
+                            {submission.tasks?.title ?? 'Zadanie'}
+                          </p>
                           <p className="text-sm text-[#7f6870]">
-                            {formatPoints(task.points)} · {task.active ? 'Aktywne' : 'Wyłączone'}
+                            {formatDateKey(submission.submission_date)} ·{' '}
+                            {submission.member_profile?.display_name ??
+                              submission.member_profile?.email ??
+                              'Użytkownik'}
                           </p>
                         </div>
-                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#8a6674]">
-                          {task.type === 'daily' ? 'Codziennie' : 'Jednorazowe'}
-                        </span>
+                        <StatusBadge status={submission.status} />
                       </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <Button
-                          disabled={isPending}
-                          onClick={() => startEditingTask(task)}
-                          variant="secondary"
-                        >
-                          <Pencil className="mr-2" size={14} />
-                          Edytuj
-                        </Button>
-                        <Button
-                          disabled={isPending}
-                          onClick={() => {
-                            startTransition(async () => {
-                              const response = await supabase
-                                .from('tasks')
-                                .update({ active: !task.active })
-                                .eq('id', task.id)
 
-                              if (response.error) {
-                                setError(response.error.message)
-                                return
-                              }
-
-                              await loadData(false)
-                            })
-                          }}
-                          variant="ghost"
-                        >
-                          {task.active ? 'Wyłącz' : 'Włącz'}
-                        </Button>
-                        <Button
-                          disabled={isPending}
-                          onClick={() => setTaskToDelete(task)}
-                          variant="danger"
-                        >
-                          <Trash2 className="mr-2" size={14} />
-                          Usuń
-                        </Button>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-[#7f6870]">Nie ma jeszcze żadnych zadań.</p>
-                )}
-              </div>
-            </Card>
-
-            <Card className="space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-bold text-[#422c36]">
-                    {partnerName ? `Nagrody dla ${partnerName}` : 'Nagrody dla partnera'}
-                  </h2>
-                  <p className="text-sm text-[#7f6870]">
-                    To są nagrody, które druga osoba może odebrać za swoje punkty.
-                  </p>
-                </div>
-                <Button disabled={isPending} onClick={openCreateRewardModal}>
-                  <Plus className="mr-2" size={16} />
-                  Dodaj
-                </Button>
-              </div>
-
-              <div className="space-y-2">
-                {rewardsData?.rewards.length ? (
-                  rewardsData.rewards.map((reward) => (
-                    <div className="space-y-3 rounded-3xl bg-[#fff8fb] p-4" key={reward.id}>
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-[#422c36]">{reward.title}</p>
-                          <p className="text-sm text-[#7f6870]">
-                            {formatPoints(reward.cost)} · {reward.active ? 'Aktywna' : 'Wyłączona'}
-                          </p>
+                      {submission.submission_photos?.length ? (
+                        <div className="grid grid-cols-3 gap-2">
+                          {submission.submission_photos.map((photo) =>
+                            photoUrls[photo.storage_path] ? (
+                              /* biome-ignore lint/performance/noImgElement: signed Supabase URLs are shown directly for private task proofs. */
+                              <img
+                                alt="Zdjęcie zgłoszenia"
+                                className="aspect-square w-full rounded-2xl object-cover"
+                                key={photo.id}
+                                src={photoUrls[photo.storage_path]}
+                              />
+                            ) : null,
+                          )}
                         </div>
-                        <Gift className="text-[#d34d7d]" size={18} />
-                      </div>
-                      <div className="grid grid-cols-3 gap-2">
-                        <Button
-                          disabled={isPending}
-                          onClick={() => startEditingReward(reward)}
-                          variant="secondary"
-                        >
-                          <Pencil className="mr-2" size={14} />
-                          Edytuj
-                        </Button>
-                        <Button
-                          disabled={isPending}
-                          onClick={() => {
-                            startTransition(async () => {
-                              const response = await supabase
-                                .from('rewards')
-                                .update({ active: !reward.active })
-                                .eq('id', reward.id)
+                      ) : null}
 
-                              if (response.error) {
-                                setError(response.error.message)
-                                return
-                              }
+                      {submission.rejection_reason ? (
+                        <p className="text-sm text-[#a2435f]">{submission.rejection_reason}</p>
+                      ) : null}
 
-                              await loadData(false)
-                            })
-                          }}
-                          variant="ghost"
-                        >
-                          {reward.active ? 'Wyłącz' : 'Włącz'}
-                        </Button>
-                        <Button
-                          disabled={isPending}
-                          onClick={() => setRewardToDelete(reward)}
-                          variant="danger"
-                        >
-                          <Trash2 className="mr-2" size={14} />
-                          Usuń
-                        </Button>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-[#7f6870]">Nie ma jeszcze żadnych nagród.</p>
-                )}
-              </div>
-
-              {rewardsData?.redemptions.length ? (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-[#c65b84]">
-                    Odbiory
-                  </h3>
-                  {rewardsData.redemptions.map((redemption) => (
-                    <div className="rounded-3xl bg-[#fff8fb] p-4" key={redemption.id}>
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="font-semibold text-[#422c36]">{redemption.reward_title}</p>
-                          <p className="text-sm text-[#7f6870]">
-                            {redemption.profiles?.display_name ?? redemption.profiles?.email} ·{' '}
-                            {redemption.status === 'fulfilled' ? 'Zrealizowana' : 'Oczekuje'}
-                          </p>
+                      {submission.status === 'pending' ? (
+                        <div className="space-y-2">
+                          <input
+                            onChange={(event) =>
+                              setRejectionReasons((current) => ({
+                                ...current,
+                                [submission.id]: event.target.value,
+                              }))
+                            }
+                            placeholder="Powód odrzucenia, jeśli odrzucasz"
+                            value={rejectionReasons[submission.id] ?? ''}
+                          />
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button
+                              disabled={isPending}
+                              onClick={() => setSubmissionToApprove(submission.id)}
+                            >
+                              <Check className="mr-2" size={16} />
+                              Akceptuj
+                            </Button>
+                            <Button
+                              disabled={isPending}
+                              onClick={() => reviewSubmission(submission.id, 'reject')}
+                              variant="danger"
+                            >
+                              <X className="mr-2" size={16} />
+                              Odrzuć
+                            </Button>
+                          </div>
                         </div>
-                        <Gift className="text-[#d34d7d]" size={18} />
-                      </div>
-                      {redemption.status === 'requested' ? (
-                        <Button
-                          className="mt-3"
-                          disabled={isPending}
-                          fullWidth
-                          onClick={() => {
-                            startTransition(async () => {
-                              const response = await supabase
-                                .from('reward_redemptions')
-                                .update({
-                                  fulfilled_at: new Date().toISOString(),
-                                  status: 'fulfilled',
-                                })
-                                .eq('id', redemption.id)
-
-                              if (response.error) {
-                                setError(response.error.message)
-                                return
-                              }
-
-                              await sendPushNotification(supabase, {
-                                body: `Nagroda "${redemption.reward_title}" została oznaczona jako zrealizowana.`,
-                                recipientProfileIds: [redemption.profile_id],
-                                title: 'Nagroda zrealizowana',
-                                url: '/history',
-                              })
-                              await loadData(false)
-                            })
-                          }}
-                          variant="secondary"
-                        >
-                          Oznacz jako zrealizowaną
-                        </Button>
                       ) : null}
                     </div>
-                  ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-[#7f6870]">
+                    {partnerName
+                      ? `${partnerName} nie ma jeszcze zgłoszeń do sprawdzenia.`
+                      : 'Nie ma jeszcze zgłoszeń partnera do sprawdzenia.'}
+                  </p>
+                )}
+              </Card>
+
+              <Card className="space-y-3">
+                <div>
+                  <h2 className="text-lg font-bold text-[#422c36]">Pseudonim połówki</h2>
+                  <p className="text-sm leading-6 text-[#7f6870]">
+                    To jest tylko Twoja nazwa dla tej osoby. Jej własna nazwa profilu zostaje bez
+                    zmian.
+                  </p>
                 </div>
-              ) : null}
-            </Card>
+                <label>
+                  <span className="field-label">Jak chcesz ją/go widzieć?</span>
+                  <input
+                    onChange={(event) => setPartnerNickname(event.target.value)}
+                    placeholder={partnerName ?? 'np. Misiak'}
+                    value={partnerNickname}
+                  />
+                </label>
+                <Button
+                  disabled={isPending}
+                  fullWidth
+                  onClick={savePartnerNickname}
+                  variant="secondary"
+                >
+                  Zapisz pseudonim
+                </Button>
+              </Card>
+            </div>
+
+            <div className="section-stack lg:grid lg:grid-cols-2 lg:items-start">
+              <Card className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-bold text-[#422c36]">
+                      {partnerName ? `Zadania dla ${partnerName}` : 'Zadania dla partnera'}
+                    </h2>
+                    <p className="text-sm text-[#7f6870]">
+                      To są zadania, które ustawiasz drugiej osobie.
+                    </p>
+                  </div>
+                  <Button disabled={isPending} onClick={openCreateTaskModal}>
+                    <Plus className="mr-2" size={16} />
+                    Dodaj
+                  </Button>
+                </div>
+
+                <div className="space-y-2">
+                  {tasks.length ? (
+                    tasks.map((task) => (
+                      <div className="space-y-3 rounded-3xl bg-[#fff8fb] p-4" key={task.id}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-semibold text-[#422c36]">{task.title}</p>
+                            <p className="text-sm text-[#7f6870]">
+                              {formatPoints(task.points)} · {task.active ? 'Aktywne' : 'Wyłączone'}
+                            </p>
+                          </div>
+                          <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#8a6674]">
+                            {task.type === 'daily' ? 'Codziennie' : 'Jednorazowe'}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <Button
+                            disabled={isPending}
+                            onClick={() => startEditingTask(task)}
+                            variant="secondary"
+                          >
+                            <Pencil className="mr-2" size={14} />
+                            Edytuj
+                          </Button>
+                          <Button
+                            disabled={isPending}
+                            onClick={() => {
+                              startTransition(async () => {
+                                const response = await supabase
+                                  .from('tasks')
+                                  .update({ active: !task.active })
+                                  .eq('id', task.id)
+
+                                if (response.error) {
+                                  setError(response.error.message)
+                                  return
+                                }
+
+                                await loadData(false)
+                              })
+                            }}
+                            variant="ghost"
+                          >
+                            {task.active ? 'Wyłącz' : 'Włącz'}
+                          </Button>
+                          <Button
+                            disabled={isPending}
+                            onClick={() => setTaskToDelete(task)}
+                            variant="danger"
+                          >
+                            <Trash2 className="mr-2" size={14} />
+                            Usuń
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-[#7f6870]">Nie ma jeszcze żadnych zadań.</p>
+                  )}
+                </div>
+              </Card>
+
+              <Card className="space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-bold text-[#422c36]">
+                      {partnerName ? `Nagrody dla ${partnerName}` : 'Nagrody dla partnera'}
+                    </h2>
+                    <p className="text-sm text-[#7f6870]">
+                      To są nagrody, które druga osoba może odebrać za swoje punkty.
+                    </p>
+                  </div>
+                  <Button disabled={isPending} onClick={openCreateRewardModal}>
+                    <Plus className="mr-2" size={16} />
+                    Dodaj
+                  </Button>
+                </div>
+
+                <div className="space-y-2">
+                  {rewardsData?.rewards.length ? (
+                    rewardsData.rewards.map((reward) => (
+                      <div className="space-y-3 rounded-3xl bg-[#fff8fb] p-4" key={reward.id}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-semibold text-[#422c36]">{reward.title}</p>
+                            <p className="text-sm text-[#7f6870]">
+                              {formatPoints(reward.cost)} ·{' '}
+                              {reward.active ? 'Aktywna' : 'Wyłączona'}
+                            </p>
+                          </div>
+                          <Gift className="text-[#d34d7d]" size={18} />
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <Button
+                            disabled={isPending}
+                            onClick={() => startEditingReward(reward)}
+                            variant="secondary"
+                          >
+                            <Pencil className="mr-2" size={14} />
+                            Edytuj
+                          </Button>
+                          <Button
+                            disabled={isPending}
+                            onClick={() => {
+                              startTransition(async () => {
+                                const response = await supabase
+                                  .from('rewards')
+                                  .update({ active: !reward.active })
+                                  .eq('id', reward.id)
+
+                                if (response.error) {
+                                  setError(response.error.message)
+                                  return
+                                }
+
+                                await loadData(false)
+                              })
+                            }}
+                            variant="ghost"
+                          >
+                            {reward.active ? 'Wyłącz' : 'Włącz'}
+                          </Button>
+                          <Button
+                            disabled={isPending}
+                            onClick={() => setRewardToDelete(reward)}
+                            variant="danger"
+                          >
+                            <Trash2 className="mr-2" size={14} />
+                            Usuń
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-[#7f6870]">Nie ma jeszcze żadnych nagród.</p>
+                  )}
+                </div>
+
+                {rewardsData?.redemptions.length ? (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-[#c65b84]">
+                      Odbiory
+                    </h3>
+                    {rewardsData.redemptions.map((redemption) => (
+                      <div className="rounded-3xl bg-[#fff8fb] p-4" key={redemption.id}>
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="font-semibold text-[#422c36]">
+                              {redemption.reward_title}
+                            </p>
+                            <p className="text-sm text-[#7f6870]">
+                              {redemption.profiles?.display_name ?? redemption.profiles?.email} ·{' '}
+                              {redemption.status === 'fulfilled' ? 'Zrealizowana' : 'Oczekuje'}
+                            </p>
+                          </div>
+                          <Gift className="text-[#d34d7d]" size={18} />
+                        </div>
+                        {redemption.status === 'requested' ? (
+                          <Button
+                            className="mt-3"
+                            disabled={isPending}
+                            fullWidth
+                            onClick={() => {
+                              startTransition(async () => {
+                                const response = await supabase
+                                  .from('reward_redemptions')
+                                  .update({
+                                    fulfilled_at: new Date().toISOString(),
+                                    status: 'fulfilled',
+                                  })
+                                  .eq('id', redemption.id)
+
+                                if (response.error) {
+                                  setError(response.error.message)
+                                  return
+                                }
+
+                                await sendPushNotification(supabase, {
+                                  body: `Nagroda "${redemption.reward_title}" została oznaczona jako zrealizowana.`,
+                                  recipientProfileIds: [redemption.profile_id],
+                                  title: 'Nagroda zrealizowana',
+                                  url: '/history',
+                                })
+                                await loadData(false)
+                              })
+                            }}
+                            variant="secondary"
+                          >
+                            Oznacz jako zrealizowaną
+                          </Button>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </Card>
+            </div>
           </>
         )}
       </main>
@@ -1099,7 +1106,6 @@ export default function PairPage() {
           </Card>
         </ModalOverlay>
       ) : null}
-      <BottomNav />
-    </div>
+    </MemberShell>
   )
 }

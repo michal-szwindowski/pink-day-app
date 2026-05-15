@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useEffectEvent, useState, useTransition } from 'react'
 
 import { BalanceCard } from '@/components/balance-card'
-import { BottomNav } from '@/components/bottom-nav'
 import { LoadingScreen } from '@/components/loading-screen'
 import { MemberLoadingScreen } from '@/components/member-loading-screen'
+import { MemberShell } from '@/components/member-shell'
 import { useAppContext } from '@/components/providers/app-provider'
 import { useToast } from '@/components/providers/toast-provider'
 import { RewardCard } from '@/components/reward-card'
@@ -90,25 +90,29 @@ export default function MemberRewardsPage() {
   }
 
   return (
-    <div className="app-shell px-4 pb-32 pt-5">
+    <MemberShell>
       <main className="section-stack">
-        <section className="space-y-2 px-1">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
-            Nagrody
-          </p>
-          <h1 className="text-3xl font-black text-[#422c36]">Wymień punkty na coś miłego</h1>
-          <p className="text-sm leading-6 text-[#7f6870]">
-            Gdy klikniesz odbiór, punkty zejdą od razu, a prośba zostanie zapisana w Waszej parze.
-          </p>
-        </section>
+        <div className="section-stack lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+          <section className="space-y-2 px-1">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
+              Nagrody
+            </p>
+            <h1 className="text-3xl font-black text-[#422c36] lg:text-4xl">
+              Wymień punkty na coś miłego
+            </h1>
+            <p className="text-sm leading-6 text-[#7f6870]">
+              Gdy klikniesz odbiór, punkty zejdą od razu, a prośba zostanie zapisana w Waszej parze.
+            </p>
+          </section>
 
-        <BalanceCard balance={balance} />
+          <BalanceCard balance={balance} />
+        </div>
 
         {loadError ? (
           <Card className="bg-[#fff1f4] text-sm text-[#a2435f]">{loadError}</Card>
         ) : null}
 
-        <section className="section-stack">
+        <section className="section-stack lg:grid lg:grid-cols-2 lg:items-start">
           {rewards.length > 0 ? (
             rewards.map((reward) => (
               <RewardCard
@@ -171,7 +175,6 @@ export default function MemberRewardsPage() {
 
         {isPending ? <p className="px-2 text-sm text-[#8b6f79]">Zapisywanie zmian...</p> : null}
       </main>
-      <BottomNav />
-    </div>
+    </MemberShell>
   )
 }

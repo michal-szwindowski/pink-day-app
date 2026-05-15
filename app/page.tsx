@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useEffectEvent, useState, useTransition } from 'react'
 
 import { BalanceCard } from '@/components/balance-card'
-import { BottomNav } from '@/components/bottom-nav'
 import { LoadingScreen } from '@/components/loading-screen'
 import { MemberLoadingScreen } from '@/components/member-loading-screen'
+import { MemberShell } from '@/components/member-shell'
 import { PhotoUploader } from '@/components/photo-uploader'
 import { useAppContext } from '@/components/providers/app-provider'
 import { useToast } from '@/components/providers/toast-provider'
@@ -192,7 +192,7 @@ export default function HomePage() {
     )
 
     return (
-      <div className="app-shell px-4 pb-32 pt-5">
+      <MemberShell>
         <main className="section-stack">
           <section className="space-y-2 px-1">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
@@ -371,32 +371,35 @@ export default function HomePage() {
             </Card>
           ) : null}
         </main>
-        <BottomNav />
-      </div>
+      </MemberShell>
     )
   }
 
   return (
-    <div className="app-shell px-4 pb-32 pt-5">
+    <MemberShell>
       <main className="section-stack">
-        <section className="space-y-2 px-1">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
-            Wasza para
-          </p>
-          <h1 className="text-3xl font-black text-[#422c36]">{getLongTodayLabel()}</h1>
-          <p className="text-sm leading-6 text-[#7f6870]">
-            Połączono z:{' '}
-            <span className="font-bold text-[#422c36]">
-              {getPartnerName(activePair, profile.id)}
-            </span>
-          </p>
-        </section>
+        <div className="section-stack lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+          <section className="space-y-2 px-1">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
+              Wasza para
+            </p>
+            <h1 className="text-3xl font-black text-[#422c36] lg:text-4xl">
+              {getLongTodayLabel()}
+            </h1>
+            <p className="text-sm leading-6 text-[#7f6870]">
+              Połączono z:{' '}
+              <span className="font-bold text-[#422c36]">
+                {getPartnerName(activePair, profile.id)}
+              </span>
+            </p>
+          </section>
 
-        <BalanceCard balance={balance} />
+          <BalanceCard balance={balance} />
+        </div>
 
         {error ? <Card className="bg-[#fff1f4] text-sm text-[#a2435f]">{error}</Card> : null}
 
-        <section className="section-stack">
+        <section className="section-stack lg:grid lg:grid-cols-2 lg:items-start">
           {tasks.length > 0 ? (
             tasks.map((task) => (
               <TaskCard
@@ -571,8 +574,6 @@ export default function HomePage() {
           </ModalOverlay>
         ) : null}
       </main>
-
-      <BottomNav />
-    </div>
+    </MemberShell>
   )
 }

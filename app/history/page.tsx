@@ -3,9 +3,9 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useEffectEvent, useState } from 'react'
 
-import { BottomNav } from '@/components/bottom-nav'
 import { LoadingScreen } from '@/components/loading-screen'
 import { MemberLoadingScreen } from '@/components/member-loading-screen'
+import { MemberShell } from '@/components/member-shell'
 import { useAppContext } from '@/components/providers/app-provider'
 import { StatusBadge } from '@/components/status-badge'
 import { Card } from '@/components/ui/card'
@@ -234,7 +234,7 @@ export default function MemberHistoryPage() {
   const stats = buildStats(pair, pairStats, profile?.id ?? null)
 
   return (
-    <div className="app-shell px-4 pb-32 pt-5">
+    <MemberShell>
       <main className="section-stack">
         <section className="space-y-2 px-1">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
@@ -249,8 +249,8 @@ export default function MemberHistoryPage() {
 
         {error ? <Card className="bg-[#fff1f4] text-sm text-[#a2435f]">{error}</Card> : null}
 
-        <section className="section-stack">
-          <Card className="space-y-4 bg-[linear-gradient(135deg,#fff7fb,#fff0df)]">
+        <section className="section-stack lg:grid lg:grid-cols-[minmax(21rem,0.9fr)_minmax(0,1.1fr)] lg:items-start">
+          <Card className="space-y-4 bg-[linear-gradient(135deg,#fff7fb,#fff0df)] lg:sticky lg:top-8">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#c65b84]">
                 Streaki
@@ -318,101 +318,102 @@ export default function MemberHistoryPage() {
             )}
           </Card>
 
-          <Card className="space-y-4">
-            <h2 className="text-lg font-bold text-[#422c36]">Zgłoszenia</h2>
-            {history?.submissions.length ? (
-              history.submissions.map((submission) => (
-                <div className="space-y-3 rounded-3xl bg-[#fff8fb] p-4" key={submission.id}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-bold text-[#422c36]">
-                        {submission.tasks?.title ?? 'Zadanie'}
-                      </p>
-                      <p className="text-sm text-[#7f6870]">
-                        {formatDateKey(submission.submission_date)}
-                      </p>
+          <div className="section-stack">
+            <Card className="space-y-4">
+              <h2 className="text-lg font-bold text-[#422c36]">Zgłoszenia</h2>
+              {history?.submissions.length ? (
+                history.submissions.map((submission) => (
+                  <div className="space-y-3 rounded-3xl bg-[#fff8fb] p-4" key={submission.id}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-bold text-[#422c36]">
+                          {submission.tasks?.title ?? 'Zadanie'}
+                        </p>
+                        <p className="text-sm text-[#7f6870]">
+                          {formatDateKey(submission.submission_date)}
+                        </p>
+                      </div>
+                      <StatusBadge status={submission.status} />
                     </div>
-                    <StatusBadge status={submission.status} />
+
+                    {submission.rejection_reason ? (
+                      <p className="text-sm text-[#a2435f]">{submission.rejection_reason}</p>
+                    ) : null}
+
+                    {submission.submission_photos?.length ? (
+                      <div className="grid grid-cols-3 gap-2">
+                        {submission.submission_photos.map((photo) =>
+                          photoUrls[photo.storage_path] ? (
+                            /* biome-ignore lint/performance/noImgElement: signed Supabase URLs are shown directly in history cards. */
+                            <img
+                              alt="Zdjęcie zgłoszenia"
+                              className="aspect-square w-full rounded-2xl object-cover"
+                              key={photo.id}
+                              src={photoUrls[photo.storage_path]}
+                            />
+                          ) : null,
+                        )}
+                      </div>
+                    ) : null}
                   </div>
+                ))
+              ) : (
+                <p className="text-sm text-[#7f6870]">Jeszcze nie ma żadnych zgłoszeń.</p>
+              )}
+            </Card>
 
-                  {submission.rejection_reason ? (
-                    <p className="text-sm text-[#a2435f]">{submission.rejection_reason}</p>
-                  ) : null}
-
-                  {submission.submission_photos?.length ? (
-                    <div className="grid grid-cols-3 gap-2">
-                      {submission.submission_photos.map((photo) =>
-                        photoUrls[photo.storage_path] ? (
-                          /* biome-ignore lint/performance/noImgElement: signed Supabase URLs are shown directly in history cards. */
-                          <img
-                            alt="Zdjęcie zgłoszenia"
-                            className="aspect-square w-full rounded-2xl object-cover"
-                            key={photo.id}
-                            src={photoUrls[photo.storage_path]}
-                          />
-                        ) : null,
-                      )}
-                    </div>
-                  ) : null}
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-[#7f6870]">Jeszcze nie ma żadnych zgłoszeń.</p>
-            )}
-          </Card>
-
-          <Card className="space-y-4">
-            <h2 className="text-lg font-bold text-[#422c36]">Punkty</h2>
-            {history?.transactions.length ? (
-              history.transactions.map((transaction) => (
-                <div
-                  className="flex items-center justify-between gap-3 rounded-3xl bg-[#fff8fb] p-4"
-                  key={transaction.id}
-                >
-                  <div>
-                    <p className="font-semibold text-[#422c36]">{transaction.note}</p>
-                    <p className="text-sm text-[#7f6870]">{transaction.reason}</p>
-                  </div>
-                  <p
-                    className={
-                      transaction.amount >= 0
-                        ? 'font-bold text-[#2f7a58]'
-                        : 'font-bold text-[#b64968]'
-                    }
+            <Card className="space-y-4">
+              <h2 className="text-lg font-bold text-[#422c36]">Punkty</h2>
+              {history?.transactions.length ? (
+                history.transactions.map((transaction) => (
+                  <div
+                    className="flex items-center justify-between gap-3 rounded-3xl bg-[#fff8fb] p-4"
+                    key={transaction.id}
                   >
-                    {transaction.amount >= 0 ? '+' : ''}
-                    {formatPoints(transaction.amount)}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-[#7f6870]">Brak operacji punktowych.</p>
-            )}
-          </Card>
-
-          <Card className="space-y-4">
-            <h2 className="text-lg font-bold text-[#422c36]">Nagrody</h2>
-            {history?.redemptions.length ? (
-              history.redemptions.map((redemption) => (
-                <div className="rounded-3xl bg-[#fff8fb] p-4" key={redemption.id}>
-                  <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-[#422c36]">{redemption.reward_title}</p>
-                      <p className="text-sm text-[#7f6870]">
-                        {redemption.status === 'requested' ? 'Oczekuje' : 'Zrealizowana'}
-                      </p>
+                      <p className="font-semibold text-[#422c36]">{transaction.note}</p>
+                      <p className="text-sm text-[#7f6870]">{transaction.reason}</p>
                     </div>
-                    <p className="font-bold text-[#b64968]">-{formatPoints(redemption.cost)}</p>
+                    <p
+                      className={
+                        transaction.amount >= 0
+                          ? 'font-bold text-[#2f7a58]'
+                          : 'font-bold text-[#b64968]'
+                      }
+                    >
+                      {transaction.amount >= 0 ? '+' : ''}
+                      {formatPoints(transaction.amount)}
+                    </p>
                   </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-[#7f6870]">Nie odebrano jeszcze żadnych nagród.</p>
-            )}
-          </Card>
+                ))
+              ) : (
+                <p className="text-sm text-[#7f6870]">Brak operacji punktowych.</p>
+              )}
+            </Card>
+
+            <Card className="space-y-4">
+              <h2 className="text-lg font-bold text-[#422c36]">Nagrody</h2>
+              {history?.redemptions.length ? (
+                history.redemptions.map((redemption) => (
+                  <div className="rounded-3xl bg-[#fff8fb] p-4" key={redemption.id}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-[#422c36]">{redemption.reward_title}</p>
+                        <p className="text-sm text-[#7f6870]">
+                          {redemption.status === 'requested' ? 'Oczekuje' : 'Zrealizowana'}
+                        </p>
+                      </div>
+                      <p className="font-bold text-[#b64968]">-{formatPoints(redemption.cost)}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-[#7f6870]">Nie odebrano jeszcze żadnych nagród.</p>
+              )}
+            </Card>
+          </div>
         </section>
       </main>
-      <BottomNav />
-    </div>
+    </MemberShell>
   )
 }

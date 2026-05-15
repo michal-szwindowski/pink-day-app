@@ -4,9 +4,9 @@ import { Copy, LogOut, ShieldCheck, Unlink, UserRound } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useEffectEvent, useState, useTransition } from 'react'
 
-import { BottomNav } from '@/components/bottom-nav'
 import { LoadingScreen } from '@/components/loading-screen'
 import { MemberLoadingScreen } from '@/components/member-loading-screen'
+import { MemberShell } from '@/components/member-shell'
 import { useAppContext } from '@/components/providers/app-provider'
 import { useToast } from '@/components/providers/toast-provider'
 import { PushSettings } from '@/components/push-settings'
@@ -200,7 +200,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="app-shell px-4 pb-32 pt-5">
+    <MemberShell>
       <main className="section-stack">
         <section className="space-y-2 px-1">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">Konto</p>
@@ -213,164 +213,172 @@ export default function AccountPage() {
         {message ? <Card className="bg-[#eefaf3] text-sm text-[#2f7753]">{message}</Card> : null}
         {error ? <Card className="bg-[#fff1f4] text-sm text-[#a2435f]">{error}</Card> : null}
 
-        <PwaInstallHelp />
-        <PushSettings />
-
-        <Card className="space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="rounded-full bg-[#fff0f6] p-3 text-[#d34d7d]">
-              <UserRound size={20} />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-[#422c36]">Profil</h2>
-              <p className="text-sm text-[#7f6870]">{authUserEmail}</p>
-            </div>
+        <div className="section-stack lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.9fr)] lg:items-start">
+          <div className="section-stack">
+            <PwaInstallHelp />
+            <PushSettings />
           </div>
 
-          <label>
-            <span className="field-label">Nazwa widoczna w aplikacji</span>
-            <input
-              onChange={(event) => setDisplayName(event.target.value)}
-              placeholder="Twoja nazwa"
-              value={displayName}
-            />
-          </label>
+          <Card className="space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="rounded-full bg-[#fff0f6] p-3 text-[#d34d7d]">
+                <UserRound size={20} />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-[#422c36]">Profil</h2>
+                <p className="text-sm text-[#7f6870]">{authUserEmail}</p>
+              </div>
+            </div>
 
-          <Button
-            disabled={isPending}
-            fullWidth
-            onClick={() => {
-              if (!profile) {
-                return
-              }
+            <label>
+              <span className="field-label">Nazwa widoczna w aplikacji</span>
+              <input
+                onChange={(event) => setDisplayName(event.target.value)}
+                placeholder="Twoja nazwa"
+                value={displayName}
+              />
+            </label>
 
-              startTransition(async () => {
-                try {
-                  setError(null)
-                  setMessage(null)
+            <Button
+              disabled={isPending}
+              fullWidth
+              onClick={() => {
+                if (!profile) {
+                  return
+                }
 
-                  const response = await supabase.rpc('update_profile_display_name', {
-                    p_display_name: displayName,
-                    p_profile_id: profile.id,
-                  })
+                startTransition(async () => {
+                  try {
+                    setError(null)
+                    setMessage(null)
 
-                  if (response.error) {
-                    throw response.error
+                    const response = await supabase.rpc('update_profile_display_name', {
+                      p_display_name: displayName,
+                      p_profile_id: profile.id,
+                    })
+
+                    if (response.error) {
+                      throw response.error
+                    }
+
+                    await refreshProfile()
+                    setMessage('Nazwa została zapisana.')
+                    showToast('Nazwa została zapisana.', 'success')
+                  } catch (caughtError) {
+                    const nextError = getErrorMessage(caughtError, 'Nie udało się zapisać nazwy.')
+                    setError(nextError)
+                    showToast(nextError, 'error')
+                  }
+                })
+              }}
+            >
+              Zapisz nazwę
+            </Button>
+          </Card>
+        </div>
+
+        <div className="section-stack lg:grid lg:grid-cols-[minmax(20rem,0.8fr)_minmax(0,1.2fr)] lg:items-start">
+          <div className="section-stack">
+            <Card className="space-y-4">
+              <h2 className="text-lg font-bold text-[#422c36]">Twój kod zaproszenia</h2>
+              <p className="text-sm leading-6 text-[#7f6870]">
+                Ten kod służy do połączenia się z drugą osobą. Nie jest kodem pokoju.
+              </p>
+              <div className="rounded-3xl bg-[#fff8fb] px-5 py-4">
+                <p className="text-3xl font-black tracking-[0.18em] text-[#422c36]">
+                  {profile?.invite_code ?? 'BRAK'}
+                </p>
+              </div>
+              <Button
+                fullWidth
+                onClick={() => {
+                  if (!profile?.invite_code) {
+                    setError('Brakuje kodu zaproszenia. Uruchom najnowszą migrację SQL.')
+                    return
                   }
 
-                  await refreshProfile()
-                  setMessage('Nazwa została zapisana.')
-                  showToast('Nazwa została zapisana.', 'success')
-                } catch (caughtError) {
-                  const nextError = getErrorMessage(caughtError, 'Nie udało się zapisać nazwy.')
-                  setError(nextError)
-                  showToast(nextError, 'error')
-                }
-              })
-            }}
-          >
-            Zapisz nazwę
-          </Button>
-        </Card>
+                  void navigator.clipboard?.writeText(profile.invite_code)
+                  setMessage('Kod skopiowany.')
+                  showToast('Kod skopiowany.', 'success')
+                }}
+                variant="secondary"
+              >
+                <Copy className="mr-2" size={16} />
+                Kopiuj kod
+              </Button>
+            </Card>
 
-        <Card className="space-y-4">
-          <h2 className="text-lg font-bold text-[#422c36]">Twój kod zaproszenia</h2>
-          <p className="text-sm leading-6 text-[#7f6870]">
-            Ten kod służy do połączenia się z drugą osobą. Nie jest kodem pokoju.
-          </p>
-          <div className="rounded-3xl bg-[#fff8fb] px-5 py-4">
-            <p className="text-3xl font-black tracking-[0.18em] text-[#422c36]">
-              {profile?.invite_code ?? 'BRAK'}
-            </p>
-          </div>
-          <Button
-            fullWidth
-            onClick={() => {
-              if (!profile?.invite_code) {
-                setError('Brakuje kodu zaproszenia. Uruchom najnowszą migrację SQL.')
-                return
-              }
-
-              void navigator.clipboard?.writeText(profile.invite_code)
-              setMessage('Kod skopiowany.')
-              showToast('Kod skopiowany.', 'success')
-            }}
-            variant="secondary"
-          >
-            <Copy className="mr-2" size={16} />
-            Kopiuj kod
-          </Button>
-        </Card>
-
-        <Card className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-bold text-[#422c36]">Rola</h2>
-              <p className="text-sm text-[#7f6870]">
-                Owner i admin zarządzają dostępem do aplikacji, ale dalej są normalnymi
-                użytkownikami.
-              </p>
-            </div>
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#fff3f7] px-3 py-1 text-xs font-bold text-[#a54568]">
-              <ShieldCheck size={14} />
-              {getRoleLabel(profile?.role)}
-            </span>
-          </div>
-
-          {profile?.role === 'owner' || profile?.role === 'admin' ? (
-            <Button fullWidth onClick={() => router.push('/dashboard')} variant="secondary">
-              Zarządzaj dostępem
-            </Button>
-          ) : null}
-        </Card>
-
-        <Card className="space-y-4">
-          <h2 className="text-lg font-bold text-[#422c36]">Twoja para</h2>
-          {pairs.length ? (
-            pairs.map((pair) => (
-              <div className="space-y-3 rounded-3xl bg-[#fff8fb] p-4" key={pair.id}>
+            <Card className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="font-bold text-[#422c36]">
-                    {profile ? `Ty i ${getPartnerLabel(pair, profile.id)}` : 'Wasza para'}
+                  <h2 className="text-lg font-bold text-[#422c36]">Rola</h2>
+                  <p className="text-sm text-[#7f6870]">
+                    Owner i admin zarządzają dostępem do aplikacji, ale dalej są normalnymi
+                    użytkownikami.
                   </p>
-                  <p className="text-sm text-[#7f6870]">Odłączenie zakończy parę dla obu osób.</p>
                 </div>
-                <label>
-                  <span className="field-label">Twój pseudonim dla tej osoby</span>
-                  <input
-                    onChange={(event) =>
-                      setPartnerNicknames((current) => ({
-                        ...current,
-                        [pair.id]: event.target.value,
-                      }))
-                    }
-                    placeholder={profile ? getPartnerName(pair, profile.id) : 'np. Misiak'}
-                    value={partnerNicknames[pair.id] ?? ''}
-                  />
-                </label>
-                <Button
-                  disabled={isPending}
-                  fullWidth
-                  onClick={() => savePartnerNickname(pair)}
-                  variant="secondary"
-                >
-                  Zapisz pseudonim
-                </Button>
-                <Button
-                  disabled={isPending}
-                  fullWidth
-                  onClick={() => setPairToLeave(pair)}
-                  variant="danger"
-                >
-                  <Unlink className="mr-2" size={16} />
-                  Odłącz mnie od tej pary
-                </Button>
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#fff3f7] px-3 py-1 text-xs font-bold text-[#a54568]">
+                  <ShieldCheck size={14} />
+                  {getRoleLabel(profile?.role)}
+                </span>
               </div>
-            ))
-          ) : (
-            <p className="text-sm text-[#7f6870]">Nie jesteś teraz w żadnej parze.</p>
-          )}
-        </Card>
+
+              {profile?.role === 'owner' || profile?.role === 'admin' ? (
+                <Button fullWidth onClick={() => router.push('/dashboard')} variant="secondary">
+                  Zarządzaj dostępem
+                </Button>
+              ) : null}
+            </Card>
+          </div>
+
+          <Card className="space-y-4">
+            <h2 className="text-lg font-bold text-[#422c36]">Twoja para</h2>
+            {pairs.length ? (
+              pairs.map((pair) => (
+                <div className="space-y-3 rounded-3xl bg-[#fff8fb] p-4" key={pair.id}>
+                  <div>
+                    <p className="font-bold text-[#422c36]">
+                      {profile ? `Ty i ${getPartnerLabel(pair, profile.id)}` : 'Wasza para'}
+                    </p>
+                    <p className="text-sm text-[#7f6870]">Odłączenie zakończy parę dla obu osób.</p>
+                  </div>
+                  <label>
+                    <span className="field-label">Twój pseudonim dla tej osoby</span>
+                    <input
+                      onChange={(event) =>
+                        setPartnerNicknames((current) => ({
+                          ...current,
+                          [pair.id]: event.target.value,
+                        }))
+                      }
+                      placeholder={profile ? getPartnerName(pair, profile.id) : 'np. Misiak'}
+                      value={partnerNicknames[pair.id] ?? ''}
+                    />
+                  </label>
+                  <Button
+                    disabled={isPending}
+                    fullWidth
+                    onClick={() => savePartnerNickname(pair)}
+                    variant="secondary"
+                  >
+                    Zapisz pseudonim
+                  </Button>
+                  <Button
+                    disabled={isPending}
+                    fullWidth
+                    onClick={() => setPairToLeave(pair)}
+                    variant="danger"
+                  >
+                    <Unlink className="mr-2" size={16} />
+                    Odłącz mnie od tej pary
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-[#7f6870]">Nie jesteś teraz w żadnej parze.</p>
+            )}
+          </Card>
+        </div>
 
         <Button
           disabled={isPending}
@@ -435,7 +443,6 @@ export default function AccountPage() {
           </Card>
         </ModalOverlay>
       ) : null}
-      <BottomNav />
-    </div>
+    </MemberShell>
   )
 }
