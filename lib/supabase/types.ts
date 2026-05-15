@@ -1,6 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
-export type ProfileRole = 'owner' | 'member'
+export type ProfileRole = 'owner' | 'admin' | 'member'
 export type TaskType = 'daily' | 'one_time'
 export type SubmissionStatus = 'pending' | 'approved' | 'rejected'
 export type RewardRedemptionStatus = 'requested' | 'fulfilled'

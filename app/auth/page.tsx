@@ -92,8 +92,8 @@ export default function AuthPage() {
                   <p className="font-semibold text-[#7f334e]">To konto nie ma jeszcze dostępu.</p>
                   <p className="mt-1">
                     {authUserEmail
-                      ? `Zalogowano jako ${authUserEmail}. Owner musi dodać ten adres w dashboardzie.`
-                      : 'Owner musi najpierw dodać ten adres w dashboardzie.'}
+                      ? `Zalogowano jako ${authUserEmail}. Owner albo admin musi dodać ten adres w dashboardzie.`
+                      : 'Owner albo admin musi najpierw dodać ten adres w dashboardzie.'}
                   </p>
                 </div>
               </div>
@@ -140,8 +140,8 @@ export default function AuthPage() {
           ) : (
             <div className="space-y-4 rounded-[28px] bg-white/85 p-4">
               <p className="text-sm leading-6 text-[#7f6870]">
-                Konto ownera zarządza dostępem, a każdy dopuszczony użytkownik korzysta z aplikacji
-                jako member.
+                Konto ownera zarządza aplikacją główną, admin pomaga zarządzać dostępem, a każdy
+                dopuszczony użytkownik korzysta z aplikacji jako member.
               </p>
 
               {error ? (

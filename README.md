@@ -5,10 +5,11 @@ Prywatna, prosta aplikacja PWA do zadań, punktów i nagród. Logowanie działa 
 ## Model aplikacji
 
 - Każda osoba, która ma dostęp, jest zwykłym użytkownikiem aplikacji i może wejść na `/`.
-- Rola `owner` służy tylko do zarządzania dostępem do aplikacji pod `/dashboard`.
+- Role `owner` i `admin` służą do zarządzania dostępem do aplikacji pod `/dashboard`.
 - Aplikacja musi mieć minimum jednego aktywnego ownera.
 - `NEXT_PUBLIC_ADMIN_EMAIL` wskazuje pierwszego ownera, np. `michal.szwindowski@gmail.com`.
-- Owner może dodać kolejne adresy Google i nadać im rolę `member` albo `owner`.
+- Owner może dodać kolejne adresy Google i nadać im rolę `member`, `admin` albo `owner`.
+- Admin może zarządzać dostępem podobnie jak owner, ale nie może odebrać roli żadnemu ownerowi.
 - Każdy użytkownik ma własny kod zaproszenia. Wpisanie kodu drugiej osoby wysyła prośbę o połączenie w parę.
 - Każdy użytkownik może mieć jedną aktywną parę.
 
@@ -45,7 +46,7 @@ NEXT_PUBLIC_ADMIN_EMAIL=michal.szwindowski@gmail.com
 
 W Supabase SQL Editor uruchom migracje.
 
-Jeśli baza jest świeża, uruchom wszystkie pliki z `supabase/migrations/` po kolei według numeru w nazwie, od `001` do `017`.
+Jeśli baza jest świeża, uruchom wszystkie pliki z `supabase/migrations/` po kolei według numeru w nazwie, od `001` do `018`.
 
 Jeśli aktualizujesz starszą wersję aplikacji, uruchom tylko brakujące migracje w kolejności rosnącej. Ostatnie migracje dodają między innymi prośby o połączenie, kierunkowe zadania i nagrody, pseudonimy partnera oraz subskrypcje powiadomień push.
 
@@ -135,7 +136,7 @@ Na iPhonie Web Push działa dla aplikacji dodanych do ekranu początkowego na iO
 - `/rewards` - odbieranie nagród za punkty.
 - `/history` - ostatnia historia.
 - `/account` - nazwa profilu, rola, wylogowanie i odłączenie od pary.
-- `/dashboard` - tylko owner: zarządzanie dostępem do aplikacji.
+- `/dashboard` - owner i admin: zarządzanie dostępem do aplikacji.
 - `/auth` - logowanie Google.
 
 ## Instalacja jako PWA
@@ -164,7 +165,7 @@ Android:
 
 - `NEXT_PUBLIC_ADMIN_EMAIL` nie jest sekretem, tylko wskazuje pierwszego ownera.
 - Dostęp opiera się na Google OAuth i prywatnej liście dozwolonych emaili.
-- Owner może zarządzać dostępem, ale nie jest osobną postacią w zadaniach. Owner też normalnie korzysta z aplikacji jako użytkownik.
+- Owner i admin mogą zarządzać dostępem, ale nie są osobnymi postaciami w zadaniach. Obie role normalnie korzystają z aplikacji jako użytkownicy.
 - To nadal prywatny projekt dla małej liczby osób, nie system enterprise.
 
 ## Manualna checklista
@@ -173,6 +174,7 @@ Android:
 - [ ] Konto spoza allowlisty nie ma dostępu.
 - [ ] Owner dodaje email drugiej osoby w `/dashboard`.
 - [ ] Nie da się wyłączyć albo zdegradować ostatniego ownera.
+- [ ] Admin może zarządzać użytkownikami, ale nie może odebrać roli ownerowi.
 - [ ] Użytkownik widzi swój osobisty kod zaproszenia.
 - [ ] Drugi użytkownik wysyła prośbę o połączenie przez wpisanie osobistego kodu.
 - [ ] Użytkownik widzi zadania dzienne na `/`.
@@ -185,4 +187,4 @@ Android:
 - [ ] Odebranie nagrody tworzy ujemną transakcję.
 - [ ] Historia pokazuje ostatnie zgłoszenia, punkty i nagrody.
 - [ ] Konto pozwala zmienić nazwę i opuścić parę.
-- [ ] `/dashboard` jest dostępny tylko dla ownerów.
+- [ ] `/dashboard` jest dostępny dla ownerów i adminów.

@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, Pencil, Plus, ShieldCheck, Trash2, Users, X } from 'lucide-react'
+import { ArrowLeft, Pencil, Plus, Trash2, Users, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useEffectEvent, useState, useTransition } from 'react'
 
@@ -30,6 +30,18 @@ const emptyAllowedUserForm: AllowedUserForm = {
 
 function ownerCount(users: Awaited<ReturnType<typeof fetchAllowedUsers>>) {
   return users.filter((user) => user.active && user.role === 'owner').length
+}
+
+function getRoleLabel(role: ProfileRole) {
+  if (role === 'owner') {
+    return 'Owner'
+  }
+
+  if (role === 'admin') {
+    return 'Admin'
+  }
+
+  return 'Member'
 }
 
 export default function DashboardPage() {
@@ -121,8 +133,8 @@ export default function DashboardPage() {
         </p>
         <h1 className="text-3xl font-black text-[#422c36]">Dostęp do aplikacji</h1>
         <p className="text-sm leading-6 text-[#7f6870]">
-          Owner zarządza tylko tym, kto może korzystać z aplikacji. Zadania, nagrody i pary są w
-          normalnym widoku aplikacji.
+          Ownerzy i admini zarządzają tym, kto może korzystać z aplikacji. Admin może robić prawie
+          wszystko to samo, ale nie może odebrać roli ownerowi.
         </p>
       </section>
 
@@ -138,7 +150,7 @@ export default function DashboardPage() {
             <div>
               <h2 className="text-lg font-bold text-[#422c36]">Uczestnicy aplikacji</h2>
               <p className="text-sm leading-6 text-[#7f6870]">
-                Owner może dodawać użytkowników i nadawać rolę ownera. W aplikacji musi zostać
+                Owner i admin mogą dodawać użytkowników oraz zmieniać role. W aplikacji musi zostać
                 przynajmniej jeden aktywny owner.
               </p>
             </div>
@@ -154,6 +166,7 @@ export default function DashboardPage() {
         {allowedUsers.map((allowedUser) => {
           const wouldRemoveLastOwner =
             allowedUser.active && allowedUser.role === 'owner' && ownerCount(allowedUsers) <= 1
+          const adminCannotChangeOwner = profile?.role === 'admin' && allowedUser.role === 'owner'
 
           return (
             <Card className="space-y-3" key={allowedUser.id}>
@@ -165,7 +178,7 @@ export default function DashboardPage() {
                   <p className="text-sm text-[#7f6870]">{allowedUser.email}</p>
                 </div>
                 <span className="rounded-full bg-[#fff3f7] px-3 py-1 text-xs font-semibold text-[#a54568]">
-                  {allowedUser.role === 'owner' ? 'Owner' : 'Member'}
+                  {getRoleLabel(allowedUser.role)}
                 </span>
               </div>
 
@@ -180,7 +193,7 @@ export default function DashboardPage() {
                 </Button>
 
                 <Button
-                  disabled={isPending || wouldRemoveLastOwner}
+                  disabled={isPending || wouldRemoveLastOwner || adminCannotChangeOwner}
                   onClick={() => {
                     startTransition(async () => {
                       try {
@@ -225,55 +238,18 @@ export default function DashboardPage() {
                 >
                   {allowedUser.active ? 'Wyłącz' : 'Włącz'}
                 </Button>
-
-                <Button
-                  className="col-span-2"
-                  disabled={
-                    isPending || (allowedUser.role === 'owner' && ownerCount(allowedUsers) <= 1)
-                  }
-                  onClick={() => {
-                    startTransition(async () => {
-                      const nextRole = allowedUser.role === 'owner' ? 'member' : 'owner'
-
-                      try {
-                        setError(null)
-                        setMessage(null)
-
-                        const response = await supabase
-                          .from('allowed_users')
-                          .update({ role: nextRole })
-                          .eq('id', allowedUser.id)
-
-                        if (response.error) {
-                          throw response.error
-                        }
-
-                        setMessage('Rola została zmieniona.')
-                        showToast('Rola została zmieniona.', 'success')
-                        await loadData(false)
-                      } catch (caughtError) {
-                        const nextError = getErrorMessage(
-                          caughtError,
-                          'Nie udało się zmienić roli.',
-                        )
-                        setError(nextError)
-                        showToast(nextError, 'error')
-                      }
-                    })
-                  }}
-                  variant="secondary"
-                >
-                  <ShieldCheck className="mr-2" size={16} />
-                  {allowedUser.role === 'owner' ? 'Zmień na member' : 'Zmień na owner'}
-                </Button>
               </div>
 
               {wouldRemoveLastOwner ? (
                 <p className="text-sm text-[#9a5266]">Nie można wyłączyć ostatniego ownera.</p>
               ) : null}
 
+              {adminCannotChangeOwner ? (
+                <p className="text-sm text-[#9a5266]">Admin nie może zmieniać statusu ownera.</p>
+              ) : null}
+
               <Button
-                disabled={isPending || wouldRemoveLastOwner}
+                disabled={isPending || wouldRemoveLastOwner || adminCannotChangeOwner}
                 fullWidth
                 onClick={() => setUserToDelete(allowedUser)}
                 variant="danger"
@@ -386,6 +362,10 @@ export default function DashboardPage() {
               <label>
                 <span className="field-label">Rola dostępu</span>
                 <select
+                  disabled={
+                    profile?.role === 'admin' &&
+                    allowedUsers.find((user) => user.id === editingUserId)?.role === 'owner'
+                  }
                   onChange={(event) =>
                     setAllowedUserForm((current) => ({
                       ...current,
@@ -395,6 +375,7 @@ export default function DashboardPage() {
                   value={allowedUserForm.role}
                 >
                   <option value="member">Member</option>
+                  <option value="admin">Admin</option>
                   <option value="owner">Owner</option>
                 </select>
               </label>

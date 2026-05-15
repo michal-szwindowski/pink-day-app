@@ -40,6 +40,18 @@ function getPartnerLabel(
   return myMembership?.partner_nickname?.trim() || getPartnerName(pair, profileId)
 }
 
+function getRoleLabel(role: 'owner' | 'admin' | 'member' | undefined) {
+  if (role === 'owner') {
+    return 'Owner'
+  }
+
+  if (role === 'admin') {
+    return 'Admin'
+  }
+
+  return 'Member'
+}
+
 export default function AccountPage() {
   const router = useRouter()
   const { authUserEmail, profile, refreshProfile, signOut, status, supabase } = useAppContext()
@@ -295,16 +307,17 @@ export default function AccountPage() {
             <div>
               <h2 className="text-lg font-bold text-[#422c36]">Rola</h2>
               <p className="text-sm text-[#7f6870]">
-                Owner zarządza dostępem do aplikacji, ale dalej jest normalnym użytkownikiem.
+                Owner i admin zarządzają dostępem do aplikacji, ale dalej są normalnymi
+                użytkownikami.
               </p>
             </div>
             <span className="inline-flex items-center gap-1 rounded-full bg-[#fff3f7] px-3 py-1 text-xs font-bold text-[#a54568]">
               <ShieldCheck size={14} />
-              {profile?.role === 'owner' ? 'Owner' : 'Member'}
+              {getRoleLabel(profile?.role)}
             </span>
           </div>
 
-          {profile?.role === 'owner' ? (
+          {profile?.role === 'owner' || profile?.role === 'admin' ? (
             <Button fullWidth onClick={() => router.push('/dashboard')} variant="secondary">
               Zarządzaj dostępem
             </Button>
