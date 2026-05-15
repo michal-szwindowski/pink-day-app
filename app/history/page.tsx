@@ -240,7 +240,7 @@ export default function MemberHistoryPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
             Historia
           </p>
-          <h1 className="text-3xl font-black text-[#422c36]">Streaki i aktywność</h1>
+          <h1 className="text-3xl font-black text-[#422c36] lg:text-4xl">Streaki i aktywność</h1>
           <p className="text-sm leading-6 text-[#7f6870]">
             Wasze streaki, statystyki, ostatnie zgłoszenia, punkty i odebrane nagrody w jednym
             miejscu.
@@ -249,7 +249,7 @@ export default function MemberHistoryPage() {
 
         {error ? <Card className="bg-[#fff1f4] text-sm text-[#a2435f]">{error}</Card> : null}
 
-        <section className="section-stack lg:grid lg:grid-cols-[minmax(21rem,0.9fr)_minmax(0,1.1fr)] lg:items-start">
+        <section className="section-stack lg:grid lg:grid-cols-[minmax(21rem,0.88fr)_minmax(0,1.12fr)] lg:items-start xl:grid-cols-[minmax(23rem,0.82fr)_minmax(0,1.18fr)]">
           <Card className="space-y-4 bg-[linear-gradient(135deg,#fff7fb,#fff0df)] lg:sticky lg:top-8">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#c65b84]">

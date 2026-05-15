@@ -7,7 +7,9 @@ export function MemberShell({ children, className }: PropsWithChildren<{ classNa
   return (
     <div className={cn('member-shell', className)}>
       <BottomNav />
-      <div className="member-content">{children}</div>
+      <div className="member-content">
+        <div className="member-stage">{children}</div>
+      </div>
     </div>
   )
 }

@@ -92,7 +92,7 @@ export default function MemberRewardsPage() {
   return (
     <MemberShell>
       <main className="section-stack">
-        <div className="section-stack lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+        <div className="section-stack lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]">
           <section className="space-y-2 px-1">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
               Nagrody
@@ -112,7 +112,7 @@ export default function MemberRewardsPage() {
           <Card className="bg-[#fff1f4] text-sm text-[#a2435f]">{loadError}</Card>
         ) : null}
 
-        <section className="section-stack lg:grid lg:grid-cols-2 lg:items-start">
+        <section className="section-stack lg:grid lg:grid-cols-2 lg:items-start xl:grid-cols-3">
           {rewards.length > 0 ? (
             rewards.map((reward) => (
               <RewardCard

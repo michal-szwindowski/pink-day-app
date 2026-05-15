@@ -204,7 +204,7 @@ export default function AccountPage() {
       <main className="section-stack">
         <section className="space-y-2 px-1">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">Konto</p>
-          <h1 className="text-3xl font-black text-[#422c36]">Twoje ustawienia</h1>
+          <h1 className="text-3xl font-black text-[#422c36] lg:text-4xl">Twoje ustawienia</h1>
           <p className="text-sm leading-6 text-[#7f6870]">
             Tutaj zmienisz swoją nazwę, sprawdzisz rolę i możesz odłączyć się od pary.
           </p>
@@ -213,7 +213,7 @@ export default function AccountPage() {
         {message ? <Card className="bg-[#eefaf3] text-sm text-[#2f7753]">{message}</Card> : null}
         {error ? <Card className="bg-[#fff1f4] text-sm text-[#a2435f]">{error}</Card> : null}
 
-        <div className="section-stack lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.9fr)] lg:items-start">
+        <div className="section-stack lg:grid lg:grid-cols-[minmax(0,0.95fr)_minmax(22rem,1.05fr)] lg:items-start">
           <div className="section-stack">
             <PwaInstallHelp />
             <PushSettings />
@@ -277,7 +277,7 @@ export default function AccountPage() {
           </Card>
         </div>
 
-        <div className="section-stack lg:grid lg:grid-cols-[minmax(20rem,0.8fr)_minmax(0,1.2fr)] lg:items-start">
+        <div className="section-stack lg:grid lg:grid-cols-[minmax(21rem,0.84fr)_minmax(0,1.16fr)] lg:items-start">
           <div className="section-stack">
             <Card className="space-y-4">
               <h2 className="text-lg font-bold text-[#422c36]">Twój kod zaproszenia</h2>

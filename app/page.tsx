@@ -208,113 +208,117 @@ export default function HomePage() {
           {message ? <Card className="bg-[#eefaf3] text-sm text-[#2f7753]">{message}</Card> : null}
           {error ? <Card className="bg-[#fff1f4] text-sm text-[#a2435f]">{error}</Card> : null}
 
-          <Card className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-[#fff0f6] p-3 text-[#d34d7d]">
-                <HeartHandshake size={20} />
+          <div className="section-stack lg:grid lg:grid-cols-2 lg:items-start">
+            <Card className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-[#fff0f6] p-3 text-[#d34d7d]">
+                  <HeartHandshake size={20} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-[#422c36]">Twój kod zaproszenia</h2>
+                  <p className="text-sm text-[#7f6870]">
+                    Wyślij go osobie, z którą chcesz się połączyć.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-lg font-bold text-[#422c36]">Twój kod zaproszenia</h2>
-                <p className="text-sm text-[#7f6870]">
-                  Wyślij go osobie, z którą chcesz się połączyć.
+
+              <div className="rounded-3xl bg-[#fff8fb] px-5 py-4">
+                <p className="text-3xl font-black tracking-[0.18em] text-[#422c36]">
+                  {profile.invite_code ?? 'BRAK'}
                 </p>
               </div>
-            </div>
 
-            <div className="rounded-3xl bg-[#fff8fb] px-5 py-4">
-              <p className="text-3xl font-black tracking-[0.18em] text-[#422c36]">
-                {profile.invite_code ?? 'BRAK'}
-              </p>
-            </div>
-
-            <Button
-              fullWidth
-              onClick={() => {
-                if (!profile.invite_code) {
-                  setError('Brakuje kodu zaproszenia. Uruchom najnowszą migrację SQL.')
-                  return
-                }
-
-                void navigator.clipboard?.writeText(profile.invite_code)
-                setMessage('Kod skopiowany.')
-                showToast('Kod skopiowany.', 'success')
-              }}
-              variant="secondary"
-            >
-              <Copy className="mr-2" size={16} />
-              Kopiuj mój kod
-            </Button>
-          </Card>
-
-          <Card className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="rounded-full bg-[#fff0f6] p-3 text-[#d34d7d]">
-                <Link2 size={20} />
-              </div>
-              <div>
-                <h2 className="text-lg font-bold text-[#422c36]">Wpisz kod drugiej osoby</h2>
-                <p className="text-sm text-[#7f6870]">
-                  Po poprawnym kodzie wyślesz prośbę o połączenie.
-                </p>
-              </div>
-            </div>
-
-            <label>
-              <span className="field-label">Kod zaproszenia</span>
-              <input
-                onChange={(event) => setJoinCode(event.target.value.toUpperCase())}
-                placeholder="ABCD1234"
-                value={joinCode}
-              />
-            </label>
-
-            <Button
-              disabled={isPending}
-              fullWidth
-              onClick={() => {
-                startTransition(async () => {
-                  try {
-                    setError(null)
-                    setMessage(null)
-
-                    const response = await supabase.rpc('request_pair_by_code', {
-                      p_invite_code: joinCode.trim(),
-                      p_profile_id: profile.id,
-                    })
-
-                    if (response.error) {
-                      throw response.error
-                    }
-
-                    setJoinCode('')
-                    setMessage('Prośba o połączenie została wysłana.')
-                    showToast('Prośba o połączenie została wysłana.', 'success')
-                    const requests = await fetchPairRequests(supabase, profile.id)
-                    const createdRequest = requests.find((request) => request.id === response.data)
-                    if (createdRequest) {
-                      await sendPushNotification(supabase, {
-                        body: `${profile.display_name ?? 'Ktoś'} wysłał(a) prośbę o połączenie.`,
-                        recipientProfileIds: [createdRequest.recipient_profile_id],
-                        title: 'Nowa prośba o połączenie',
-                        url: '/',
-                      })
-                    }
-                    await loadData(true)
-                  } catch (caughtError) {
-                    const nextError =
-                      caughtError instanceof Error
-                        ? caughtError.message
-                        : 'Nie udało się wysłać prośby.'
-                    setError(nextError)
-                    showToast(nextError, 'error')
+              <Button
+                fullWidth
+                onClick={() => {
+                  if (!profile.invite_code) {
+                    setError('Brakuje kodu zaproszenia. Uruchom najnowszą migrację SQL.')
+                    return
                   }
-                })
-              }}
-              variant="secondary"
-            >
-              Wyślij prośbę
-            </Button>
-          </Card>
+
+                  void navigator.clipboard?.writeText(profile.invite_code)
+                  setMessage('Kod skopiowany.')
+                  showToast('Kod skopiowany.', 'success')
+                }}
+                variant="secondary"
+              >
+                <Copy className="mr-2" size={16} />
+                Kopiuj mój kod
+              </Button>
+            </Card>
+
+            <Card className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-[#fff0f6] p-3 text-[#d34d7d]">
+                  <Link2 size={20} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-[#422c36]">Wpisz kod drugiej osoby</h2>
+                  <p className="text-sm text-[#7f6870]">
+                    Po poprawnym kodzie wyślesz prośbę o połączenie.
+                  </p>
+                </div>
+              </div>
+
+              <label>
+                <span className="field-label">Kod zaproszenia</span>
+                <input
+                  onChange={(event) => setJoinCode(event.target.value.toUpperCase())}
+                  placeholder="ABCD1234"
+                  value={joinCode}
+                />
+              </label>
+
+              <Button
+                disabled={isPending}
+                fullWidth
+                onClick={() => {
+                  startTransition(async () => {
+                    try {
+                      setError(null)
+                      setMessage(null)
+
+                      const response = await supabase.rpc('request_pair_by_code', {
+                        p_invite_code: joinCode.trim(),
+                        p_profile_id: profile.id,
+                      })
+
+                      if (response.error) {
+                        throw response.error
+                      }
+
+                      setJoinCode('')
+                      setMessage('Prośba o połączenie została wysłana.')
+                      showToast('Prośba o połączenie została wysłana.', 'success')
+                      const requests = await fetchPairRequests(supabase, profile.id)
+                      const createdRequest = requests.find(
+                        (request) => request.id === response.data,
+                      )
+                      if (createdRequest) {
+                        await sendPushNotification(supabase, {
+                          body: `${profile.display_name ?? 'Ktoś'} wysłał(a) prośbę o połączenie.`,
+                          recipientProfileIds: [createdRequest.recipient_profile_id],
+                          title: 'Nowa prośba o połączenie',
+                          url: '/',
+                        })
+                      }
+                      await loadData(true)
+                    } catch (caughtError) {
+                      const nextError =
+                        caughtError instanceof Error
+                          ? caughtError.message
+                          : 'Nie udało się wysłać prośby.'
+                      setError(nextError)
+                      showToast(nextError, 'error')
+                    }
+                  })
+                }}
+                variant="secondary"
+              >
+                Wyślij prośbę
+              </Button>
+            </Card>
+          </div>
 
           {incomingRequests.length ? (
             <Card className="space-y-4">
@@ -375,60 +379,90 @@ export default function HomePage() {
     )
   }
 
+  const approvedTasks = tasks.filter((task) => task.latestSubmission?.status === 'approved').length
+  const pendingTasks = tasks.filter((task) => task.latestSubmission?.status === 'pending').length
+  const openTasks = tasks.length - approvedTasks - pendingTasks
+
   return (
     <MemberShell>
       <main className="section-stack">
-        <div className="section-stack lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-          <section className="space-y-2 px-1">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
-              Wasza para
-            </p>
-            <h1 className="text-3xl font-black text-[#422c36] lg:text-4xl">
-              {getLongTodayLabel()}
-            </h1>
-            <p className="text-sm leading-6 text-[#7f6870]">
-              Połączono z:{' '}
-              <span className="font-bold text-[#422c36]">
-                {getPartnerName(activePair, profile.id)}
-              </span>
-            </p>
-          </section>
-
-          <BalanceCard balance={balance} />
-        </div>
-
         {error ? <Card className="bg-[#fff1f4] text-sm text-[#a2435f]">{error}</Card> : null}
 
-        <section className="section-stack lg:grid lg:grid-cols-2 lg:items-start">
-          {tasks.length > 0 ? (
-            tasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                onSubmit={(currentTask) => {
-                  if (
-                    currentTask.latestSubmission &&
-                    (currentTask.latestSubmission.status === 'pending' ||
-                      currentTask.latestSubmission.status === 'approved')
-                  ) {
-                    setError('To zadanie zostało już dziś wysłane.')
-                    showToast('To zadanie zostało już dziś wysłane.', 'info')
-                    return
-                  }
+        <div className="section-stack lg:grid lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="section-stack">
+            <section className="space-y-2 px-1 lg:px-0">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
+                Wasza para
+              </p>
+              <h1 className="text-3xl font-black text-[#422c36] lg:text-5xl">
+                {getLongTodayLabel()}
+              </h1>
+              <p className="max-w-2xl text-sm leading-6 text-[#7f6870] lg:text-base">
+                Połączono z:{' '}
+                <span className="font-bold text-[#422c36]">
+                  {getPartnerName(activePair, profile.id)}
+                </span>
+              </p>
+            </section>
 
-                  setSelectedTask(currentTask)
-                  setFiles([])
-                  setSubmissionError(null)
-                  setError(null)
-                }}
-                task={task}
-              />
-            ))
-          ) : (
-            <Card className="text-center text-sm text-[#7f6870]">
-              Ta para nie ma jeszcze aktywnych zadań.
+            <section className="section-stack lg:grid lg:grid-cols-2 lg:items-start">
+              {tasks.length > 0 ? (
+                tasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    onSubmit={(currentTask) => {
+                      if (
+                        currentTask.latestSubmission &&
+                        (currentTask.latestSubmission.status === 'pending' ||
+                          currentTask.latestSubmission.status === 'approved')
+                      ) {
+                        setError('To zadanie zostało już dziś wysłane.')
+                        showToast('To zadanie zostało już dziś wysłane.', 'info')
+                        return
+                      }
+
+                      setSelectedTask(currentTask)
+                      setFiles([])
+                      setSubmissionError(null)
+                      setError(null)
+                    }}
+                    task={task}
+                  />
+                ))
+              ) : (
+                <Card className="text-center text-sm text-[#7f6870]">
+                  Ta para nie ma jeszcze aktywnych zadań.
+                </Card>
+              )}
+            </section>
+          </div>
+
+          <aside className="section-stack lg:sticky lg:top-8">
+            <BalanceCard balance={balance} />
+            <Card className="space-y-4 bg-[linear-gradient(135deg,#fff9fc,#fff0df)]">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#c65b84]">
+                  Dzisiaj
+                </p>
+                <h2 className="text-xl font-black text-[#422c36]">Twój plan</h2>
+              </div>
+              <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
+                <div className="rounded-3xl bg-white/80 p-3">
+                  <p className="text-xs font-semibold text-[#9a7180]">Do zrobienia</p>
+                  <p className="text-2xl font-black text-[#422c36]">{openTasks}</p>
+                </div>
+                <div className="rounded-3xl bg-white/80 p-3">
+                  <p className="text-xs font-semibold text-[#9a7180]">Oczekuje</p>
+                  <p className="text-2xl font-black text-[#422c36]">{pendingTasks}</p>
+                </div>
+                <div className="rounded-3xl bg-white/80 p-3">
+                  <p className="text-xs font-semibold text-[#9a7180]">Gotowe</p>
+                  <p className="text-2xl font-black text-[#422c36]">{approvedTasks}</p>
+                </div>
+              </div>
             </Card>
-          )}
-        </section>
+          </aside>
+        </div>
 
         {selectedTask ? (
           <ModalOverlay>

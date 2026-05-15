@@ -29,13 +29,13 @@ export function BottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-30 flex justify-center lg:sticky lg:top-8 lg:inset-auto lg:block lg:self-start">
       <div
-        className="grid w-full max-w-md rounded-t-[30px] border border-white/80 border-b-0 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-2 shadow-[0_-18px_34px_-28px_rgba(76,35,51,0.42)] backdrop-blur lg:flex lg:max-w-none lg:flex-col lg:gap-3 lg:rounded-[34px] lg:border-b lg:p-4 lg:shadow-[0_28px_70px_-34px_rgba(76,35,51,0.48)]"
+        className="grid w-full max-w-md rounded-t-[30px] border border-white/80 border-b-0 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-2 shadow-[0_-18px_34px_-28px_rgba(76,35,51,0.42)] backdrop-blur lg:flex lg:max-w-none lg:flex-col lg:gap-3 lg:rounded-[38px] lg:border-b lg:bg-white/72 lg:p-4 lg:shadow-[0_30px_90px_-42px_rgba(76,35,51,0.5)]"
         style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
       >
-        <div className="hidden rounded-[28px] bg-[linear-gradient(135deg,#fff7fb,#ffe7ef)] p-4 lg:block">
+        <div className="hidden overflow-hidden rounded-[30px] bg-[linear-gradient(135deg,#fff7fb,#ffe7ef_55%,#fff0dd)] p-5 lg:block">
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-white/85 p-3 text-[#d34d7d]">
-              <Sparkles size={18} />
+            <div className="rounded-full bg-white/85 p-3 text-[#d34d7d] shadow-sm">
+              <Sparkles size={19} />
             </div>
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
@@ -46,6 +46,9 @@ export function BottomNav() {
               </p>
             </div>
           </div>
+          <p className="mt-4 text-sm leading-6 text-[#7f6870]">
+            Zadania, nagrody i Wasz rytm w jednym miejscu.
+          </p>
         </div>
 
         {items.map((item) => {
@@ -54,8 +57,10 @@ export function BottomNav() {
           return (
             <Link
               className={cn(
-                'flex min-h-14 flex-col items-center justify-center gap-1 rounded-full px-2 text-[11px] font-semibold transition lg:min-h-0 lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:py-3 lg:text-sm',
-                isActive ? 'bg-[#ffe3ed] text-[#ba396b]' : 'text-[#826a73] hover:bg-[#fff5f8]',
+                'flex min-h-14 flex-col items-center justify-center gap-1 rounded-full px-2 text-[11px] font-semibold transition lg:min-h-0 lg:flex-row lg:justify-start lg:gap-3 lg:px-4 lg:py-3.5 lg:text-sm',
+                isActive
+                  ? 'bg-[#ffe3ed] text-[#ba396b] shadow-[0_14px_28px_-20px_rgba(186,57,107,0.65)]'
+                  : 'text-[#826a73] hover:bg-white/78',
               )}
               href={item.href}
               key={item.href}

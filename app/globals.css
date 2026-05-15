@@ -84,6 +84,10 @@ label {
   min-width: 0;
 }
 
+.member-stage {
+  min-width: 0;
+}
+
 .section-stack {
   display: flex;
   flex-direction: column;
@@ -91,16 +95,41 @@ label {
 }
 
 @media (min-width: 1024px) {
+  html {
+    background:
+      radial-gradient(circle at 10% 8%, rgba(255, 201, 221, 0.92), transparent 26%),
+      radial-gradient(circle at 90% 6%, rgba(255, 236, 204, 0.9), transparent 22%),
+      radial-gradient(circle at 78% 82%, rgba(255, 223, 234, 0.72), transparent 28%),
+      linear-gradient(180deg, #fff8fc 0%, #fff3f8 48%, #fffaf5 100%);
+  }
+
   .member-shell {
     display: grid;
-    max-width: 84rem;
-    grid-template-columns: 16rem minmax(0, 1fr);
-    gap: 2rem;
-    padding: 2rem;
+    max-width: 96rem;
+    grid-template-columns: 18rem minmax(0, 1fr);
+    gap: 2.5rem;
+    padding: 2rem clamp(1.5rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+
+  .member-content {
+    min-height: calc(100vh - 4rem);
+  }
+
+  .member-stage {
+    min-height: calc(100vh - 4rem);
+    border: 1px solid rgba(255, 255, 255, 0.78);
+    border-radius: 2.25rem;
+    background: rgba(255, 255, 255, 0.46);
+    padding: clamp(1.25rem, 2vw, 2rem);
+    box-shadow:
+      0 28px 90px -48px rgba(107, 55, 78, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(18px);
   }
 
   .section-stack {
-    gap: 1.25rem;
+    gap: 1.35rem;
   }
 }
 

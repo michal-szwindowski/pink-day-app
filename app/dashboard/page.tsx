@@ -134,7 +134,7 @@ export default function DashboardPage() {
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">
           Dashboard
         </p>
-        <h1 className="text-3xl font-black text-[#422c36]">Dostęp do aplikacji</h1>
+        <h1 className="text-3xl font-black text-[#422c36] lg:text-4xl">Dostęp do aplikacji</h1>
         <p className="text-sm leading-6 text-[#7f6870]">
           Ownerzy i admini zarządzają tym, kto może korzystać z aplikacji. Admin może robić prawie
           wszystko to samo, ale nie może odebrać roli ownerowi.

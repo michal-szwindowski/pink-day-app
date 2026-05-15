@@ -360,7 +360,7 @@ export default function PairPage() {
       <main className="section-stack">
         <section className="space-y-2 px-1">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#c65b84]">Para</p>
-          <h1 className="text-3xl font-black text-[#422c36]">
+          <h1 className="text-3xl font-black text-[#422c36] lg:text-4xl">
             {partnerName ? `Ty i ${partnerName}` : 'Połączcie się w parę'}
           </h1>
           <p className="text-sm leading-6 text-[#7f6870]">
